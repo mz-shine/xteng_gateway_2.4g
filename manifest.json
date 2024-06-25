@@ -1,0 +1,10 @@
+{
+  "domain": "xteng_gateway",
+  "name": "Xteng Gateway",
+  "codeowners": [],
+  "dependencies": [],
+  "documentation": "",
+  "iot_class": "local_polling",
+  "requirements": ["pyserial"],
+  "version": "0.1.0"
+}
