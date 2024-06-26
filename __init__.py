@@ -12,13 +12,13 @@ import os
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 
-DOMAIN = "xteng_gateway"
+DOMAIN = "xteng_gateway_2.4g"
 # 配置串行端口参数
-PORT = '/dev/ttyAMA0'  # 串行端口名称，根据你的设备进行修改
-BAUDRATE = 500000  # 波特率，根据你的设备进行修改
+PORT = '/dev/ttyUSB0'  # 串行端口名称，根据你的设备进行修改
+BAUDRATE = 115200  # 波特率，根据你的设备进行修改
 sendBuffer = []
 getBuffer = []
-xtengDict = dict()
+entities = dict()
 deviceMap = dict()
 SER = serial.Serial(PORT, BAUDRATE, timeout=0.5)
 
@@ -28,14 +28,14 @@ def setup(hass: HomeAssistant, config: ConfigType):
     # with open("/config/custom_components/xteng_gateway/log.txt", "+a", encoding="utf-8") as file:
     #    file.write(str(strftime('%Y-%m-%d %H:%M:%S  ', localtime())))
 
-    with open("/config/custom_components/xteng_gateway/data.json", "r", encoding="utf-8") as data:
+    with open("/config/custom_components/xteng_gateway_2.4g/data.json", "r", encoding="utf-8") as data:
         result = json.load(data)
 
     hass.data[DOMAIN] = {
         "devices": result["deviceList"],
         "scenes": result["sceneList"],
-        "send_list": sendBuffer,
-        "xteng_dict": xtengDict,
+        "send": sendBuffer,
+        "entities": entities,
         "get_buffer": getBuffer
     }
     
@@ -48,7 +48,6 @@ def setup(hass: HomeAssistant, config: ConfigType):
 
     return True
 
-
 def uart_get():
     while True:
         if getBuffer:
@@ -57,26 +56,12 @@ def uart_get():
             for dev in mapper:
                 deviceId = dev["deviceId"]
                 devStatus = eval(dev["devStatus"])
-                xtengDict[deviceId].state_updated_callback(devStatus)
-
+                entities[deviceId].state_updated_callback(devStatus)
                 
 def uart_send():
-    seq_num = random.randint(0x01, 0xFF)  # 流水号1
-
     while True:
         if sendBuffer:
-            # {"PACKET_ID": _, "ORDER": _, "LOCATION": _, "DATA": _}
-            data = sendBuffer.pop(0)
-            seq_num = (seq_num + 1) % (0xFF + 1)
-            packet = bytearray([0x55, 0x1E, 0xFF, data["PACKET_ID"], 0x55, 0xA1, seq_num, 0x64, data["ORDER"]])
-            packet.extend(data["LOCATION"])
-            packet.extend(data["DATA"])
+            packet = sendBuffer.pop(0)
             SER.flush()
             SER.write(packet)
             SER.flush()
-
-            
-def find_termination(buffer, terminator):
-    """在缓冲区中查找终止符的位置"""
-    position = buffer.find(terminator)
-    return position

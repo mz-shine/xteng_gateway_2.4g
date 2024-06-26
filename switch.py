@@ -21,50 +21,50 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None
 ) -> None:
     # 加载JSON数据
-    switches = hass.data[DOMAIN]['devices']
+    devices = hass.data[DOMAIN]['devices']
 
     switch_style_list = ['822610001193', '822610002193', '822610003193']
-    _switches = []
-    for switch in switches:
-        switch_style = str(switch["factoryCode"]) + str(switch["factorySubtype"]) + str(switch["factoryType"])
+    entities = []
+    for device in devices:
+        style = str(device["factoryCode"]) + str(device["factorySubtype"]) + str(device["factoryType"])
         # 一位开关
-        if switch_style == switch_style_list[0]:
-            switch_name = switch["deviceName"]
-            wsDevData = eval(switch["wsDevData"])
+        if style == switch_style_list[0]:
+            switch_name = device["deviceName"]
+            wsDevData = eval(device["wsDevData"])
             switch_state = wsDevData.get(f'switch_1', 0)
 
-            switch_class = XtSwitch(switch, switch['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
-            switch_id = switch['deviceId']
+            switch_class = XtSwitchEntity(device, device['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
+            switch_id = device['deviceId']
             hass.data[DOMAIN]['xteng_dict'][switch_id] = switch_class
-            _switches.append(switch_class)
+            entities.append(switch_class)
         # 无线二位开关
-        elif switch_style == switch_style_list[1]:
-            uiRemark = eval(switch["uiRemark"])
-            wsDevData = eval(switch["wsDevData"])
+        elif style == switch_style_list[1]:
+            uiRemark = eval(device["uiRemark"])
+            wsDevData = eval(device["wsDevData"])
             for i in range(1, 3):
                 switch_name = uiRemark.get(f'switch_name_{i}', f'switch_{i}')
                 switch_state = wsDevData.get(f'switch_{i}', 0)
 
-                switch_class = XtSwitch(switch, switch['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
-                switch_id = switch['deviceId']
+                switch_class = XtSwitchEntity(device, device['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
+                switch_id = device['deviceId']
                 hass.data[DOMAIN]['xteng_dict'][switch_id] = switch_class
-                _switches.append(switch_class)
+                entities.append(switch_class)
         # 无线三位开关
-        elif switch_style == switch_style_list[2]:
-            uiRemark = eval(switch["uiRemark"])
-            wsDevData = eval(switch["wsDevData"])
+        elif style == switch_style_list[2]:
+            uiRemark = eval(device["uiRemark"])
+            wsDevData = eval(device["wsDevData"])
             for i in range(1, 4):
                 switch_name = uiRemark.get(f'switch_name_{i}', f'switch_{i}')
                 switch_state = wsDevData.get(f'switch_{i}', 0)
 
-                switch_class = XtSwitch(switch, switch['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
-                switch_id = switch['deviceId']
+                switch_class = XtSwitchEntity(device, device['deviceId'], 'switch_name_1', switch_name, switch_state, hass)
+                switch_id = device['deviceId']
                 hass.data[DOMAIN]['xteng_dict'][switch_id] = switch_class
-                _switches.append(switch_class)
+                entities.append(switch_class)
     # 将实体添加到Home Assistant
-    add_entities(_switches)
+    add_entities(entities)
 
-class XtSwitch(SwitchEntity):
+class XtSwitchEntity(SwitchEntity):
     def __init__(self, switch, device_id, switch_number, switch_name, initial_state, hass):
         self._hass = hass
         self._switch = switch

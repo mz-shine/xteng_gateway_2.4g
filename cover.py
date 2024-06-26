@@ -15,26 +15,24 @@ def setup_platform(
     add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None
 ) -> None:
-    """Set up the custom light platform."""
     # Get data that you put in hass.data[DOMAIN] in your __init__.py
-    covers = hass.data[DOMAIN]['devices']
+    devices = hass.data[DOMAIN]['devices']
 
     cover_style_list = ['25664']
-    _covers = []
-    for cover in covers:
+    entities = []
+    for device in devices:
         # 设备类型为灯光
-        cover_style = str(cover["factoryCode"]) + str(cover["factorySubtype"]) + str(cover["factoryType"])
-        if cover_style in cover_style_list:
-            cover_class = XtCover(cover, hass)
-            cover_id = cover['deviceId']
-            hass.data[DOMAIN]['xteng_dict'][cover_id] = cover_class
-            _covers.append(cover_class)
+        style = str(device["factoryCode"]) + str(device["factorySubtype"]) + str(device["factoryType"])
+        if style in cover_style_list:
+            entity = XtCoverEntity(device, hass)
+            hass.data[DOMAIN]['entities'][entity.unique_id] = entity
+            entities.append(entity)
 
     # Add entities
-    add_entities(_covers)
+    add_entities(entities)
 
 
-class XtCover(CoverEntity):
+class XtCoverEntity(CoverEntity):
     def __init__(self, cover, hass):
         self._hass = hass
         self._cover = cover

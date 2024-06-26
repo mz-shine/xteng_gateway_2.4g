@@ -1,5 +1,3 @@
-# Awesome Lights
-
 This integration shows how you would go ahead and integrate a physical light into Home Assistant.
 
 If you use this integration as a template, make sure you tweak the following places:
