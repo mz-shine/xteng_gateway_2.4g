@@ -31,6 +31,13 @@ def setup(hass: HomeAssistant, config: ConfigType):
     with open("/config/custom_components/xteng_gateway_2.4g/data.json", "r", encoding="utf-8") as data:
         result = json.load(data)
 
+    try:
+        SER.open()
+    except:
+        PORT = '/dev/ttyUSB1'
+        SER = serial.Serial(PORT, BAUDRATE, timeout=0.5)
+        SER.open()
+
     hass.data[DOMAIN] = {
         "devices": result["deviceList"],
         "scenes": result["sceneList"],
